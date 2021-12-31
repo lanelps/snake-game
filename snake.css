@@ -10,21 +10,25 @@ body {
 
 body {
   padding: 20px;
+  background-color: rgb(187, 187, 187);
 }
 
 #board {
   position: relative;
   width: 500px;
   height: 300px;
-  border: 5px solid black;
+  margin: 0 auto;
+  background-color: #000;
+  border: 5px solid rgb(34, 34, 34);
+  border-radius: 5px;
   box-sizing: content-box;
 }
 
 .pixel {
   position: absolute;
-  border: 1px solid black;
+  border: 1px solid rgb(34, 34, 34);
 }
 
 .pixel:hover {
-  background-color: red;
+  border: 1px solid rgb(25, 103, 171) !important;
 }

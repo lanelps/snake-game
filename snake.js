@@ -7,6 +7,21 @@ const COLS = board.clientWidth / 10;
 const ROWS = board.clientHeight / 10;
 const PIXEL_SIZE = 10;
 
+const pixels = new Map();
+
+const currentSnake = [
+  [0, 0],
+  [0, 1],
+  [0, 2],
+  [0, 3],
+  [0, 4],
+  [0, 5],
+  [0, 6],
+  [0, 7],
+  [0, 8],
+  [0, 9]
+];
+
 /* ========== METHODS ========== */
 //
 
@@ -22,10 +37,79 @@ function initialiseBoard(rows, cols) {
       width: ${PIXEL_SIZE}px;
       height: ${PIXEL_SIZE}px;
       `;
-
       board.appendChild(pixel);
+
+      const position = `${i}_${j}`;
+      pixels.set(position, pixel);
     }
   }
+}
+
+function drawSnake(snake) {
+  const snakePositions = new Set();
+
+  for (let [x, y] of snake) {
+    const position = `${x}_${y}`;
+    snakePositions.add(position);
+  }
+
+  for (let i = 0; i < ROWS; i++) {
+    for (let j = 0; j < COLS; j++) {
+      const position = `${i}_${j}`;
+      const pixel = pixels.get(position);
+
+      pixel.style.backgroundColor = snakePositions.has(position)
+        ? `#03A062`
+        : `transparent`;
+    }
+  }
+}
+
+const moveRight = ([t, l]) => [t, l + 1];
+const moveLeft = ([t, l]) => [t, l - 1];
+const moveTop = ([t, l]) => [t - 1, l];
+const moveBottom = ([t, l]) => [t + 1, l];
+
+let currentDirection = moveBottom;
+
+function step() {
+  currentSnake.shift();
+  const head = currentSnake[currentSnake.length - 1];
+  const nextHead = currentDirection(head);
+  currentSnake.push(nextHead);
+  drawSnake(currentSnake);
+}
+
+function draw() {
+  drawSnake(currentSnake);
+  setInterval(() => {
+    step();
+  }, 100);
+}
+
+function eventListeners() {
+  window.addEventListener('keydown', e => {
+    switch (e.key) {
+      case 'ArrowRight':
+        currentDirection = moveRight;
+        break;
+
+      case 'ArrowLeft':
+        currentDirection = moveLeft;
+        break;
+
+      case 'ArrowUp':
+        currentDirection = moveTop;
+        break;
+
+      case 'ArrowDown':
+        currentDirection = moveBottom;
+        break;
+
+      default:
+        currentDirection = moveRight;
+    }
+  });
 }
 
 /* ========== MAIN ========== */
@@ -34,7 +118,9 @@ function initialiseBoard(rows, cols) {
 function main() {
   if (typeof window === 'undefined' && !window.DOMContentLoaded) return;
 
+  eventListeners();
   initialiseBoard(ROWS, COLS);
+  draw();
 }
 
 main();
