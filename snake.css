@@ -1,0 +1,30 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  padding: 20px;
+}
+
+#board {
+  position: relative;
+  width: 500px;
+  height: 300px;
+  border: 5px solid black;
+  box-sizing: content-box;
+}
+
+.pixel {
+  position: absolute;
+  border: 1px solid black;
+}
+
+.pixel:hover {
+  background-color: red;
+}
