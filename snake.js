@@ -9,7 +9,7 @@ const PIXEL_SIZE = 10;
 
 const pixels = new Map();
 
-const currentSnake = [
+const startingSnake = [
   [0, 0],
   [0, 1],
   [0, 2],
@@ -70,18 +70,18 @@ const moveLeft = ([t, l]) => [t, l - 1];
 const moveTop = ([t, l]) => [t - 1, l];
 const moveBottom = ([t, l]) => [t + 1, l];
 
-let currentDirection = moveBottom;
+let currentDirection = moveRight;
 
 function step() {
-  currentSnake.shift();
-  const head = currentSnake[currentSnake.length - 1];
+  startingSnake.shift();
+  const head = startingSnake[startingSnake.length - 1];
   const nextHead = currentDirection(head);
-  currentSnake.push(nextHead);
-  drawSnake(currentSnake);
+  startingSnake.push(nextHead);
+  drawSnake(startingSnake);
 }
 
 function draw() {
-  drawSnake(currentSnake);
+  drawSnake(startingSnake);
   setInterval(() => {
     step();
   }, 100);
@@ -91,18 +91,22 @@ function eventListeners() {
   window.addEventListener('keydown', e => {
     switch (e.key) {
       case 'ArrowRight':
+      case 'd':
         currentDirection = moveRight;
         break;
 
       case 'ArrowLeft':
+      case 'a':
         currentDirection = moveLeft;
         break;
 
       case 'ArrowUp':
+      case 'w':
         currentDirection = moveTop;
         break;
 
       case 'ArrowDown':
+      case 's':
         currentDirection = moveBottom;
         break;
 

@@ -27,6 +27,8 @@ body {
 .pixel {
   position: absolute;
   border: 1px solid rgb(34, 34, 34);
+  font-size: 8px;
+  text-align: center;
 }
 
 .pixel:hover {
