@@ -1,6 +1,6 @@
 /* ========== CONSTANTS ========== */
 
-const COLORS = { SNAKE: "#03A062", BOARD: "transparent" };
+const COLORS = { SNAKE: "#03A062", BOARD: "transparent", FOOD: "red" };
 
 const KEYS = {
   RIGHT: ["ArrowRight", "d"],
@@ -38,6 +38,7 @@ const PIXEL_SIZE = 10;
 
 let lastRenderTime = 0;
 let isOutOfBounds = false;
+let foods = [];
 
 const pixels = new Map();
 
@@ -60,6 +61,8 @@ const initialiseBoard = (rows, cols) => {
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
       const pixel = document.createElement(`div`);
+
+      pixel.addEventListener("click", (e) => addFood(e.target));
 
       pixel.classList.add(`pixel`);
       pixel.style.cssText = `
@@ -89,6 +92,11 @@ const drawSnake = () => {
       const position = `${i}_${j}`;
       const pixel = pixels.get(position);
 
+      // Check if the pixel is a food pixel
+      if (foods.some((food) => food[0] === i && food[1] === j)) {
+        continue; // Skip this iteration if the pixel is a food pixel
+      }
+
       pixel.style.backgroundColor = snakePositions.has(position)
         ? COLORS.SNAKE
         : COLORS.BOARD;
@@ -103,7 +111,10 @@ const resetSnake = () => {
   snake = [...SNAKE_DEFAULT_POSITION];
   currentDirection = moveRight;
   isOutOfBounds = false;
+  foods = [];
+
   drawSnake();
+  drawFood();
 };
 
 const checkOutOfBounds = (head) => {
@@ -137,6 +148,18 @@ const step = () => {
   snake.shift();
   snake.push(nextHead);
   drawSnake();
+  drawFood();
+};
+
+const drawFood = () => {
+  foods?.forEach((food) => {
+    food.style.backgroundColor = COLORS.FOOD;
+  });
+};
+
+const addFood = (pixel) => {
+  foods.push(pixel);
+  drawFood();
 };
 
 //
