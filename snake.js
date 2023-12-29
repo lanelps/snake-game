@@ -23,6 +23,7 @@ const ROWS = board.clientHeight / 10;
 const PIXEL_SIZE = 10;
 
 let lastRenderTime = 0;
+let isOutOfBounds = false;
 
 const pixels = new Map();
 
@@ -90,7 +91,6 @@ const moveBottom = ([t, l]) => [t + 1, l];
 let currentDirection = moveRight;
 
 function step() {
-  snake.shift();
   const head = snake[snake.length - 1];
   const nextHead = currentDirection(head);
 
@@ -101,9 +101,11 @@ function step() {
     nextHead[1] < 0 ||
     nextHead[1] >= COLS
   ) {
+    isOutOfBounds = true;
     return;
   }
 
+  snake.shift();
   snake.push(nextHead);
   drawSnake(snake);
 }
@@ -128,12 +130,16 @@ function eventListeners() {
 
     if (KEYS.RIGHT.includes(e.key) && lastDirection !== moveLeft) {
       currentDirection = moveRight;
+      isOutOfBounds = false;
     } else if (KEYS.LEFT.includes(e.key) && lastDirection !== moveRight) {
       currentDirection = moveLeft;
+      isOutOfBounds = false;
     } else if (KEYS.UP.includes(e.key) && lastDirection !== moveBottom) {
       currentDirection = moveTop;
+      isOutOfBounds = false;
     } else if (KEYS.DOWN.includes(e.key) && lastDirection !== moveTop) {
       currentDirection = moveBottom;
+      isOutOfBounds = false;
     }
   });
 }
