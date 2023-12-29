@@ -38,6 +38,8 @@ const PIXEL_SIZE = 10;
 let snakeSpeed = 10;
 let lastRenderTime = 0;
 let food = null;
+let originalSpeed;
+let spacePressed = false;
 
 const pixels = new Map();
 
@@ -228,6 +230,20 @@ const eventListeners = () => {
       currentDirection = moveTop;
     } else if (KEYS.DOWN.includes(e.key) && lastDirection !== moveTop) {
       currentDirection = moveBottom;
+    }
+
+    if (e.key === " " && !spacePressed) {
+      console.log(`space pressed`);
+      spacePressed = true;
+      originalSpeed = snakeSpeed;
+      snakeSpeed *= 2;
+    }
+  });
+
+  window.addEventListener("keyup", (e) => {
+    if (e.key === " ") {
+      spacePressed = false;
+      snakeSpeed = originalSpeed;
     }
   });
 };
