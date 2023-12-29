@@ -20,11 +20,6 @@ const SNAKE_DEFAULT_POSITION = [
   [0, 2],
   [0, 3],
   [0, 4],
-  [0, 5],
-  [0, 6],
-  [0, 7],
-  [0, 8],
-  [0, 9],
 ];
 
 const COLS = board.clientWidth / 10;
@@ -35,7 +30,7 @@ const PIXEL_SIZE = 10;
 /* ========== VARIABLES ========== */
 let snakeSpeed = 10;
 let lastRenderTime = 0;
-let foods = [];
+let food = null;
 
 const pixels = new Map();
 
@@ -58,8 +53,6 @@ const initialiseBoard = (rows, cols) => {
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
       const pixel = document.createElement(`div`);
-
-      pixel.addEventListener("click", () => addFood([i, j]));
 
       pixel.classList.add(`pixel`);
       pixel.style.cssText = `
@@ -90,7 +83,7 @@ const drawSnake = () => {
       const pixel = pixels.get(position);
 
       // Check if the pixel is a food pixel
-      if (foods.some((food) => food[0] === i && food[1] === j)) {
+      if (food[0] === i && food[1] === j) {
         continue; // Skip this iteration if the pixel is a food pixel
       }
 
@@ -107,11 +100,10 @@ const drawSnake = () => {
 const resetSnake = () => {
   snake = [...SNAKE_DEFAULT_POSITION];
   currentDirection = moveRight;
-  foods = [];
   snakeSpeed = 10;
 
   drawSnake();
-  drawFood();
+  generateFood();
 };
 
 const grow = () => {
@@ -119,8 +111,6 @@ const grow = () => {
   snake.unshift(tail);
 
   snakeSpeed += 0.5;
-
-  removeFood(snake[snake.length - 1]);
 };
 
 const checkOutOfBounds = (head) => {
@@ -134,14 +124,11 @@ const checkCollision = (head) => {
 };
 
 const checkForFood = (head) => {
-  for (let i = 0; i < foods.length; i++) {
-    if (head[0] === foods[i][0] && head[1] === foods[i][1]) {
-      foods.splice(i, 1);
-      return true;
-    }
+  if (head[0] === food[0] && head[1] === food[1]) {
+    return true;
+  } else {
+    return false;
   }
-
-  return false;
 };
 
 const step = () => {
@@ -163,6 +150,7 @@ const step = () => {
   // Check for food
   if (checkForFood(nextHead)) {
     grow();
+    generateFood();
   }
 
   snake.shift();
@@ -172,24 +160,25 @@ const step = () => {
 };
 
 const drawFood = () => {
-  foods?.forEach((food) => {
-    const position = `${food[0]}_${food[1]}`;
-    const pixel = pixels.get(position);
+  const position = `${food[0]}_${food[1]}`;
+  const pixel = pixels.get(position);
 
-    pixel.style.backgroundColor = COLORS.FOOD;
-  });
+  pixel.style.backgroundColor = COLORS.FOOD;
 };
 
-const addFood = (pixel) => {
-  if (foods.some(([fx, fy]) => fx === pixel[0] && fy === pixel[1])) return;
+const generateFood = () => {
+  const x = Math.floor(Math.random() * ROWS);
+  const y = Math.floor(Math.random() * COLS);
 
-  foods.push(pixel);
-  drawFood();
-};
+  if (
+    snake.some(([sx, sy]) => sx === x && sy === y) ||
+    (x === food?.[0] && y === food?.[1])
+  ) {
+    generateFood();
+    return;
+  }
 
-const removeFood = (pixel) => {
-  const [px, py] = pixel;
-  foods = foods.filter(([fx, fy]) => fx !== px || fy !== py);
+  food = [x, y];
 };
 
 //
@@ -236,6 +225,7 @@ const main = () => {
 
   eventListeners();
   initialiseBoard(ROWS, COLS);
+  generateFood();
 
   requestAnimationFrame(draw);
 };
