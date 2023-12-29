@@ -1,3 +1,18 @@
+/* ========== CONSTANTS ========== */
+const COLORS = {
+  SNAKE: "#03A062",
+  BOARD: "transparent",
+};
+
+const KEYS = {
+  RIGHT: ["ArrowRight", "d"],
+  LEFT: ["ArrowLeft", "a"],
+  UP: ["ArrowUp", "w"],
+  DOWN: ["ArrowDown", "s"],
+};
+
+const SNAKE_SPEED = 10;
+
 /* ========== VARIABLES ========== */
 //
 
@@ -7,9 +22,11 @@ const COLS = board.clientWidth / 10;
 const ROWS = board.clientHeight / 10;
 const PIXEL_SIZE = 10;
 
+let lastRenderTime = 0;
+
 const pixels = new Map();
 
-const startingSnake = [
+const snake = [
   [0, 0],
   [0, 1],
   [0, 2],
@@ -73,49 +90,50 @@ const moveBottom = ([t, l]) => [t + 1, l];
 let currentDirection = moveRight;
 
 function step() {
-  startingSnake.shift();
-  const head = startingSnake[startingSnake.length - 1];
+  snake.shift();
+  const head = snake[snake.length - 1];
   const nextHead = currentDirection(head);
-  startingSnake.push(nextHead);
-  drawSnake(startingSnake);
+
+  // Check for out of bounds
+  if (
+    nextHead[0] < 0 ||
+    nextHead[0] >= ROWS ||
+    nextHead[1] < 0 ||
+    nextHead[1] >= COLS
+  ) {
+    return;
+  }
+
+  snake.push(nextHead);
+  drawSnake(snake);
 }
 
-function draw() {
-  drawSnake(startingSnake);
-  setInterval(() => {
-    step();
-  }, 100);
+function draw(currentTime = 0) {
+  const secondsSinceLastRender = (currentTime - lastRenderTime) / 1000;
+
+  if (secondsSinceLastRender < 1 / SNAKE_SPEED) {
+    requestAnimationFrame(draw);
+    return;
+  }
+
+  lastRenderTime = currentTime;
+
+  step();
+  requestAnimationFrame(draw);
 }
 
 function eventListeners() {
   window.addEventListener("keydown", (e) => {
-    switch (e.key) {
-      case "ArrowRight":
-      case "d":
-        if (currentDirection === moveLeft) break;
-        currentDirection = moveRight;
-        break;
+    const lastDirection = currentDirection;
 
-      case "ArrowLeft":
-      case "a":
-        if (currentDirection === moveRight) break;
-        currentDirection = moveLeft;
-        break;
-
-      case "ArrowUp":
-      case "w":
-        if (currentDirection === moveBottom) break;
-        currentDirection = moveTop;
-        break;
-
-      case "ArrowDown":
-      case "s":
-        if (currentDirection === moveTop) break;
-        currentDirection = moveBottom;
-        break;
-
-      default:
-        break;
+    if (KEYS.RIGHT.includes(e.key) && lastDirection !== moveLeft) {
+      currentDirection = moveRight;
+    } else if (KEYS.LEFT.includes(e.key) && lastDirection !== moveRight) {
+      currentDirection = moveLeft;
+    } else if (KEYS.UP.includes(e.key) && lastDirection !== moveBottom) {
+      currentDirection = moveTop;
+    } else if (KEYS.DOWN.includes(e.key) && lastDirection !== moveTop) {
+      currentDirection = moveBottom;
     }
   });
 }
@@ -128,7 +146,8 @@ function main() {
 
   eventListeners();
   initialiseBoard(ROWS, COLS);
-  draw();
+
+  requestAnimationFrame(draw);
 }
 
 main();
