@@ -1,3 +1,8 @@
+/* ========== DOM ELEMENTS ========== */
+
+const board = document.getElementById("board");
+
+//
 /* ========== CONSTANTS ========== */
 
 const COLORS = { SNAKE: "#03A062", BOARD: "transparent", FOOD: "red" };
@@ -22,20 +27,13 @@ const SNAKE_DEFAULT_POSITION = [
   [0, 9],
 ];
 
-const SNAKE_SPEED = 10;
-
-//
-/* ========== DOM ELEMENTS ========== */
-
-const board = document.getElementById("board");
-
-//
-/* ========== VARIABLES ========== */
-
 const COLS = board.clientWidth / 10;
 const ROWS = board.clientHeight / 10;
 const PIXEL_SIZE = 10;
 
+//
+/* ========== VARIABLES ========== */
+let snakeSpeed = 10;
 let lastRenderTime = 0;
 let foods = [];
 
@@ -110,6 +108,7 @@ const resetSnake = () => {
   snake = [...SNAKE_DEFAULT_POSITION];
   currentDirection = moveRight;
   foods = [];
+  snakeSpeed = 10;
 
   drawSnake();
   drawFood();
@@ -118,6 +117,8 @@ const resetSnake = () => {
 const grow = () => {
   const tail = [...snake[0]];
   snake.unshift(tail);
+
+  snakeSpeed += 0.5;
 
   removeFood(snake[snake.length - 1]);
 };
@@ -197,7 +198,7 @@ const removeFood = (pixel) => {
 const draw = (currentTime = 0) => {
   const secondsSinceLastRender = (currentTime - lastRenderTime) / 1000;
 
-  if (secondsSinceLastRender < 1 / SNAKE_SPEED) {
+  if (secondsSinceLastRender < 1 / snakeSpeed) {
     requestAnimationFrame(draw);
     return;
   }
