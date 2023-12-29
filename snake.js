@@ -1,7 +1,7 @@
 /* ========== VARIABLES ========== */
 //
 
-const board = document.getElementById('board');
+const board = document.getElementById("board");
 
 const COLS = board.clientWidth / 10;
 const ROWS = board.clientHeight / 10;
@@ -19,7 +19,7 @@ const startingSnake = [
   [0, 6],
   [0, 7],
   [0, 8],
-  [0, 9]
+  [0, 9],
 ];
 
 /* ========== METHODS ========== */
@@ -88,30 +88,30 @@ function draw() {
 }
 
 function eventListeners() {
-  window.addEventListener('keydown', e => {
+  window.addEventListener("keydown", (e) => {
     switch (e.key) {
-      case 'ArrowRight':
-      case 'd':
+      case "ArrowRight":
+      case "d":
         currentDirection = moveRight;
         break;
 
-      case 'ArrowLeft':
-      case 'a':
+      case "ArrowLeft":
+      case "a":
         currentDirection = moveLeft;
         break;
 
-      case 'ArrowUp':
-      case 'w':
+      case "ArrowUp":
+      case "w":
         currentDirection = moveTop;
         break;
 
-      case 'ArrowDown':
-      case 's':
+      case "ArrowDown":
+      case "s":
         currentDirection = moveBottom;
         break;
 
       default:
-        currentDirection = moveRight;
+        break;
     }
   });
 }
@@ -120,7 +120,7 @@ function eventListeners() {
 //
 
 function main() {
-  if (typeof window === 'undefined' && !window.DOMContentLoaded) return;
+  if (typeof window === "undefined" && !window.DOMContentLoaded) return;
 
   eventListeners();
   initialiseBoard(ROWS, COLS);
