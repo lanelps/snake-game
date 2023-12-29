@@ -37,7 +37,6 @@ const ROWS = board.clientHeight / 10;
 const PIXEL_SIZE = 10;
 
 let lastRenderTime = 0;
-let isOutOfBounds = false;
 let foods = [];
 
 const pixels = new Map();
@@ -62,7 +61,7 @@ const initialiseBoard = (rows, cols) => {
     for (let j = 0; j < cols; j++) {
       const pixel = document.createElement(`div`);
 
-      pixel.addEventListener("click", (e) => addFood(e.target));
+      pixel.addEventListener("click", () => addFood([i, j]));
 
       pixel.classList.add(`pixel`);
       pixel.style.cssText = `
@@ -110,11 +109,17 @@ const drawSnake = () => {
 const resetSnake = () => {
   snake = [...SNAKE_DEFAULT_POSITION];
   currentDirection = moveRight;
-  isOutOfBounds = false;
   foods = [];
 
   drawSnake();
   drawFood();
+};
+
+const grow = () => {
+  const tail = [...snake[0]];
+  snake.unshift(tail);
+
+  removeFood(snake[snake.length - 1]);
 };
 
 const checkOutOfBounds = (head) => {
@@ -127,22 +132,36 @@ const checkCollision = (head) => {
   );
 };
 
+const checkForFood = (head) => {
+  for (let i = 0; i < foods.length; i++) {
+    if (head[0] === foods[i][0] && head[1] === foods[i][1]) {
+      foods.splice(i, 1);
+      return true;
+    }
+  }
+
+  return false;
+};
+
 const step = () => {
   const head = snake[snake.length - 1];
   const nextHead = currentDirection(head);
 
   // Check for out of bounds
   if (checkOutOfBounds(nextHead)) {
-    isOutOfBounds = true;
     resetSnake();
     return;
   }
 
   // Check for collision
   if (checkCollision(nextHead)) {
-    isOutOfBounds = true;
     resetSnake();
     return;
+  }
+
+  // Check for food
+  if (checkForFood(nextHead)) {
+    grow();
   }
 
   snake.shift();
@@ -153,13 +172,23 @@ const step = () => {
 
 const drawFood = () => {
   foods?.forEach((food) => {
-    food.style.backgroundColor = COLORS.FOOD;
+    const position = `${food[0]}_${food[1]}`;
+    const pixel = pixels.get(position);
+
+    pixel.style.backgroundColor = COLORS.FOOD;
   });
 };
 
 const addFood = (pixel) => {
+  if (foods.some(([fx, fy]) => fx === pixel[0] && fy === pixel[1])) return;
+
   foods.push(pixel);
   drawFood();
+};
+
+const removeFood = (pixel) => {
+  const [px, py] = pixel;
+  foods = foods.filter(([fx, fy]) => fx !== px || fy !== py);
 };
 
 //
