@@ -1,8 +1,6 @@
 /* ========== CONSTANTS ========== */
-const COLORS = {
-  SNAKE: "#03A062",
-  BOARD: "transparent",
-};
+
+const COLORS = { SNAKE: "#03A062", BOARD: "transparent" };
 
 const KEYS = {
   RIGHT: ["ArrowRight", "d"],
@@ -23,12 +21,16 @@ const SNAKE_DEFAULT_POSITION = [
   [0, 8],
   [0, 9],
 ];
+
 const SNAKE_SPEED = 10;
 
-/* ========== VARIABLES ========== */
 //
+/* ========== DOM ELEMENTS ========== */
 
 const board = document.getElementById("board");
+
+//
+/* ========== VARIABLES ========== */
 
 const COLS = board.clientWidth / 10;
 const ROWS = board.clientHeight / 10;
@@ -41,10 +43,20 @@ const pixels = new Map();
 
 let snake = [...SNAKE_DEFAULT_POSITION];
 
-/* ========== METHODS ========== */
 //
+/* ========== DIRECTION FUNCTIONS ========== */
 
-function initialiseBoard(rows, cols) {
+const moveRight = ([t, l]) => [t, l + 1];
+const moveLeft = ([t, l]) => [t, l - 1];
+const moveTop = ([t, l]) => [t - 1, l];
+const moveBottom = ([t, l]) => [t + 1, l];
+
+let currentDirection = moveRight;
+
+//
+/* ========== BOARD FUNCTIONS ========== */
+
+const initialiseBoard = (rows, cols) => {
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
       const pixel = document.createElement(`div`);
@@ -62,9 +74,9 @@ function initialiseBoard(rows, cols) {
       pixels.set(position, pixel);
     }
   }
-}
+};
 
-function drawSnake() {
+const drawSnake = () => {
   const snakePositions = new Set();
 
   for (let [x, y] of snake) {
@@ -78,18 +90,14 @@ function drawSnake() {
       const pixel = pixels.get(position);
 
       pixel.style.backgroundColor = snakePositions.has(position)
-        ? `#03A062`
-        : `transparent`;
+        ? COLORS.SNAKE
+        : COLORS.BOARD;
     }
   }
-}
+};
 
-const moveRight = ([t, l]) => [t, l + 1];
-const moveLeft = ([t, l]) => [t, l - 1];
-const moveTop = ([t, l]) => [t - 1, l];
-const moveBottom = ([t, l]) => [t + 1, l];
-
-let currentDirection = moveRight;
+//
+/* ========== SNAKE FUNCTIONS ========== */
 
 const resetSnake = () => {
   snake = [...SNAKE_DEFAULT_POSITION];
@@ -108,7 +116,7 @@ const checkCollision = (head) => {
   );
 };
 
-function step() {
+const step = () => {
   const head = snake[snake.length - 1];
   const nextHead = currentDirection(head);
 
@@ -129,9 +137,12 @@ function step() {
   snake.shift();
   snake.push(nextHead);
   drawSnake();
-}
+};
 
-function draw(currentTime = 0) {
+//
+/* ========== ANIMATION FUNCTIONS ========== */
+
+const draw = (currentTime = 0) => {
   const secondsSinceLastRender = (currentTime - lastRenderTime) / 1000;
 
   if (secondsSinceLastRender < 1 / SNAKE_SPEED) {
@@ -143,9 +154,12 @@ function draw(currentTime = 0) {
 
   step();
   requestAnimationFrame(draw);
-}
+};
 
-function eventListeners() {
+//
+/* ========== EVENT LISTENERS ========== */
+
+const eventListeners = () => {
   window.addEventListener("keydown", (e) => {
     const lastDirection = currentDirection;
 
@@ -159,18 +173,18 @@ function eventListeners() {
       currentDirection = moveBottom;
     }
   });
-}
+};
 
-/* ========== MAIN ========== */
 //
+/* ========== MAIN ========== */
 
-function main() {
+const main = () => {
   if (typeof window === "undefined" && !window.DOMContentLoaded) return;
 
   eventListeners();
   initialiseBoard(ROWS, COLS);
 
   requestAnimationFrame(draw);
-}
+};
 
 main();
