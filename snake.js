@@ -11,6 +11,18 @@ const KEYS = {
   DOWN: ["ArrowDown", "s"],
 };
 
+const SNAKE_DEFAULT_POSITION = [
+  [0, 0],
+  [0, 1],
+  [0, 2],
+  [0, 3],
+  [0, 4],
+  [0, 5],
+  [0, 6],
+  [0, 7],
+  [0, 8],
+  [0, 9],
+];
 const SNAKE_SPEED = 10;
 
 /* ========== VARIABLES ========== */
@@ -27,18 +39,7 @@ let isOutOfBounds = false;
 
 const pixels = new Map();
 
-const snake = [
-  [0, 0],
-  [0, 1],
-  [0, 2],
-  [0, 3],
-  [0, 4],
-  [0, 5],
-  [0, 6],
-  [0, 7],
-  [0, 8],
-  [0, 9],
-];
+let snake = [...SNAKE_DEFAULT_POSITION];
 
 /* ========== METHODS ========== */
 //
@@ -63,7 +64,7 @@ function initialiseBoard(rows, cols) {
   }
 }
 
-function drawSnake(snake) {
+function drawSnake() {
   const snakePositions = new Set();
 
   for (let [x, y] of snake) {
@@ -90,24 +91,44 @@ const moveBottom = ([t, l]) => [t + 1, l];
 
 let currentDirection = moveRight;
 
+const resetSnake = () => {
+  snake = [...SNAKE_DEFAULT_POSITION];
+  currentDirection = moveRight;
+  isOutOfBounds = false;
+  drawSnake();
+};
+
+const checkOutOfBounds = (head) => {
+  return head[0] < 0 || head[0] >= ROWS || head[1] < 0 || head[1] >= COLS;
+};
+
+const checkCollision = (head) => {
+  return snake.some(
+    (position) => position[0] === head[0] && position[1] === head[1]
+  );
+};
+
 function step() {
   const head = snake[snake.length - 1];
   const nextHead = currentDirection(head);
 
   // Check for out of bounds
-  if (
-    nextHead[0] < 0 ||
-    nextHead[0] >= ROWS ||
-    nextHead[1] < 0 ||
-    nextHead[1] >= COLS
-  ) {
+  if (checkOutOfBounds(nextHead)) {
     isOutOfBounds = true;
+    resetSnake();
+    return;
+  }
+
+  // Check for collision
+  if (checkCollision(nextHead)) {
+    isOutOfBounds = true;
+    resetSnake();
     return;
   }
 
   snake.shift();
   snake.push(nextHead);
-  drawSnake(snake);
+  drawSnake();
 }
 
 function draw(currentTime = 0) {
@@ -130,16 +151,12 @@ function eventListeners() {
 
     if (KEYS.RIGHT.includes(e.key) && lastDirection !== moveLeft) {
       currentDirection = moveRight;
-      isOutOfBounds = false;
     } else if (KEYS.LEFT.includes(e.key) && lastDirection !== moveRight) {
       currentDirection = moveLeft;
-      isOutOfBounds = false;
     } else if (KEYS.UP.includes(e.key) && lastDirection !== moveBottom) {
       currentDirection = moveTop;
-      isOutOfBounds = false;
     } else if (KEYS.DOWN.includes(e.key) && lastDirection !== moveTop) {
       currentDirection = moveBottom;
-      isOutOfBounds = false;
     }
   });
 }
