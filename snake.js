@@ -5,7 +5,14 @@ const board = document.getElementById("board");
 //
 /* ========== CONSTANTS ========== */
 
-const COLORS = { SNAKE: "#03A062", BOARD: "transparent", FOOD: "red" };
+const COLORS = {
+  SNAKE: {
+    START: [0, 255, 0, 1],
+    END: [255, 255, 255, 0.3],
+  },
+  BOARD: [0, 0, 0, 0],
+  FOOD: `linear-gradient(to right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C)`,
+};
 
 const KEYS = {
   RIGHT: ["ArrowRight", "d"],
@@ -69,29 +76,37 @@ const initialiseBoard = (rows, cols) => {
   }
 };
 
+const clearBoard = () => {
+  for (let pixel of pixels.values()) {
+    pixel.style.background = `rgba(${COLORS.BOARD[0]}, ${COLORS.BOARD[1]}, ${COLORS.BOARD[2]}, ${COLORS.BOARD[3]})`;
+  }
+};
+
 const drawSnake = () => {
-  const snakePositions = new Set();
+  clearBoard();
 
-  for (let [x, y] of snake) {
-    const position = `${x}_${y}`;
-    snakePositions.add(position);
+  const colorStep = [
+    (COLORS.SNAKE.START[0] - COLORS.SNAKE.END[0]) / snake.length,
+    (COLORS.SNAKE.START[1] - COLORS.SNAKE.END[1]) / snake.length,
+    (COLORS.SNAKE.START[2] - COLORS.SNAKE.END[2]) / snake.length,
+    (COLORS.SNAKE.START[3] - COLORS.SNAKE.END[3]) / snake.length,
+  ];
+
+  for (let i = 0; i < snake.length; i++) {
+    const position = `${snake[i][0]}_${snake[i][1]}`;
+    const pixel = pixels.get(position);
+
+    const color = [
+      Math.round(COLORS.SNAKE.END[0] + colorStep[0] * i),
+      Math.round(COLORS.SNAKE.END[1] + colorStep[1] * i),
+      Math.round(COLORS.SNAKE.END[2] + colorStep[2] * i),
+      (COLORS.SNAKE.END[3] + colorStep[3] * i).toFixed(2),
+    ];
+
+    pixel.style.background = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]})`;
   }
 
-  for (let i = 0; i < ROWS; i++) {
-    for (let j = 0; j < COLS; j++) {
-      const position = `${i}_${j}`;
-      const pixel = pixels.get(position);
-
-      // Check if the pixel is a food pixel
-      if (food[0] === i && food[1] === j) {
-        continue; // Skip this iteration if the pixel is a food pixel
-      }
-
-      pixel.style.backgroundColor = snakePositions.has(position)
-        ? COLORS.SNAKE
-        : COLORS.BOARD;
-    }
-  }
+  drawFood();
 };
 
 //
@@ -102,8 +117,8 @@ const resetSnake = () => {
   currentDirection = moveRight;
   snakeSpeed = 10;
 
-  drawSnake();
   generateFood();
+  drawSnake();
 };
 
 const grow = () => {
@@ -163,7 +178,7 @@ const drawFood = () => {
   const position = `${food[0]}_${food[1]}`;
   const pixel = pixels.get(position);
 
-  pixel.style.backgroundColor = COLORS.FOOD;
+  pixel.style.background = COLORS.FOOD;
 };
 
 const generateFood = () => {
