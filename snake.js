@@ -11,7 +11,7 @@ const COLORS = {
     END: [255, 255, 255, 0.3],
   },
   BOARD: [0, 0, 0, 0],
-  FOOD: `linear-gradient(to right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C)`,
+  FOOD: `#BF953F`,
 };
 
 const KEYS = {
