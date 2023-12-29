@@ -92,21 +92,25 @@ function eventListeners() {
     switch (e.key) {
       case "ArrowRight":
       case "d":
+        if (currentDirection === moveLeft) break;
         currentDirection = moveRight;
         break;
 
       case "ArrowLeft":
       case "a":
+        if (currentDirection === moveRight) break;
         currentDirection = moveLeft;
         break;
 
       case "ArrowUp":
       case "w":
+        if (currentDirection === moveBottom) break;
         currentDirection = moveTop;
         break;
 
       case "ArrowDown":
       case "s":
+        if (currentDirection === moveTop) break;
         currentDirection = moveBottom;
         break;
 
