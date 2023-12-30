@@ -44,6 +44,7 @@ let food = null;
 let originalSpeed;
 let spacePressed = false;
 let ctx;
+let snakeColors = [];
 
 let snake = [...SNAKE_DEFAULT_POSITION];
 
@@ -73,6 +74,7 @@ const resetSnake = () => {
   snakeSpeed = 10;
 
   generateFood();
+  calculateColors();
   drawSnake();
 };
 
@@ -80,6 +82,7 @@ const grow = () => {
   const tail = [...snake[0]];
   snake.unshift(tail);
 
+  calculateColors();
   snakeSpeed += 0.5;
 };
 
@@ -116,6 +119,29 @@ const generateFood = () => {
   food = [x, y];
 };
 
+const calculateColors = () => {
+  const colorStep = [
+    (COLORS.SNAKE.START[0] - COLORS.SNAKE.END[0]) / snake.length,
+    (COLORS.SNAKE.START[1] - COLORS.SNAKE.END[1]) / snake.length,
+    (COLORS.SNAKE.START[2] - COLORS.SNAKE.END[2]) / snake.length,
+    (COLORS.SNAKE.START[3] - COLORS.SNAKE.END[3]) / snake.length,
+  ];
+
+  const newSnakeColors = [];
+  for (let i = 0; i < snake.length; i++) {
+    const color = [
+      Math.round(COLORS.SNAKE.END[0] + colorStep[0] * i),
+      Math.round(COLORS.SNAKE.END[1] + colorStep[1] * i),
+      Math.round(COLORS.SNAKE.END[2] + colorStep[2] * i),
+      (COLORS.SNAKE.END[3] + colorStep[3] * i).toFixed(2),
+    ];
+
+    newSnakeColors.push(color);
+  }
+
+  snakeColors = newSnakeColors;
+};
+
 //
 /* ========== ANIMATION FUNCTIONS ========== */
 const clearBoard = () => {
@@ -134,22 +160,8 @@ const drawBoard = () => {
 };
 
 const drawSnake = () => {
-  const colorStep = [
-    (COLORS.SNAKE.START[0] - COLORS.SNAKE.END[0]) / snake.length,
-    (COLORS.SNAKE.START[1] - COLORS.SNAKE.END[1]) / snake.length,
-    (COLORS.SNAKE.START[2] - COLORS.SNAKE.END[2]) / snake.length,
-    (COLORS.SNAKE.START[3] - COLORS.SNAKE.END[3]) / snake.length,
-  ];
-
   for (let i = 0; i < snake.length; i++) {
-    const color = [
-      Math.round(COLORS.SNAKE.END[0] + colorStep[0] * i),
-      Math.round(COLORS.SNAKE.END[1] + colorStep[1] * i),
-      Math.round(COLORS.SNAKE.END[2] + colorStep[2] * i),
-      (COLORS.SNAKE.END[3] + colorStep[3] * i).toFixed(2),
-    ];
-
-    ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]})`;
+    ctx.fillStyle = `rgba(${snakeColors[i][0]}, ${snakeColors[i][1]}, ${snakeColors[i][2]}, ${snakeColors[i][3]})`;
     ctx.fillRect(
       snake[i][1] * PIXEL_SIZE,
       snake[i][0] * PIXEL_SIZE,
@@ -255,6 +267,7 @@ const main = () => {
   eventListeners();
   initialiseBoard();
   generateFood();
+  calculateColors();
 
   requestAnimationFrame(draw);
 };
