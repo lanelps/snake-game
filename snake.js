@@ -1,6 +1,8 @@
 /* ========== DOM ELEMENTS ========== */
 
 const board = document.getElementById("board");
+board.width = 500;
+board.height = 300;
 
 //
 /* ========== CONSTANTS ========== */
@@ -11,6 +13,7 @@ const COLORS = {
     END: [255, 255, 255, 0.3],
   },
   BOARD: [0, 0, 0, 0],
+  BORDER: `#222222`,
   FOOD: `#BF953F`,
 };
 
@@ -40,8 +43,7 @@ let lastRenderTime = 0;
 let food = null;
 let originalSpeed;
 let spacePressed = false;
-
-const pixels = new Map();
+let ctx;
 
 let snake = [...SNAKE_DEFAULT_POSITION];
 
@@ -58,57 +60,8 @@ let currentDirection = moveRight;
 //
 /* ========== BOARD FUNCTIONS ========== */
 
-const initialiseBoard = (rows, cols) => {
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      const pixel = document.createElement(`div`);
-
-      pixel.classList.add(`pixel`);
-      pixel.style.cssText = `
-      left: ${j * PIXEL_SIZE}px;
-      top: ${i * PIXEL_SIZE}px;
-      width: ${PIXEL_SIZE}px;
-      height: ${PIXEL_SIZE}px;
-      `;
-      board.appendChild(pixel);
-
-      const position = `${i}_${j}`;
-      pixels.set(position, pixel);
-    }
-  }
-};
-
-const clearBoard = () => {
-  for (let pixel of pixels.values()) {
-    pixel.style.background = `rgba(${COLORS.BOARD[0]}, ${COLORS.BOARD[1]}, ${COLORS.BOARD[2]}, ${COLORS.BOARD[3]})`;
-  }
-};
-
-const drawSnake = () => {
-  clearBoard();
-
-  const colorStep = [
-    (COLORS.SNAKE.START[0] - COLORS.SNAKE.END[0]) / snake.length,
-    (COLORS.SNAKE.START[1] - COLORS.SNAKE.END[1]) / snake.length,
-    (COLORS.SNAKE.START[2] - COLORS.SNAKE.END[2]) / snake.length,
-    (COLORS.SNAKE.START[3] - COLORS.SNAKE.END[3]) / snake.length,
-  ];
-
-  for (let i = 0; i < snake.length; i++) {
-    const position = `${snake[i][0]}_${snake[i][1]}`;
-    const pixel = pixels.get(position);
-
-    const color = [
-      Math.round(COLORS.SNAKE.END[0] + colorStep[0] * i),
-      Math.round(COLORS.SNAKE.END[1] + colorStep[1] * i),
-      Math.round(COLORS.SNAKE.END[2] + colorStep[2] * i),
-      (COLORS.SNAKE.END[3] + colorStep[3] * i).toFixed(2),
-    ];
-
-    pixel.style.background = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]})`;
-  }
-
-  drawFood();
+const initialiseBoard = () => {
+  ctx = board.getContext("2d", { alpha: false });
 };
 
 //
@@ -148,6 +101,74 @@ const checkForFood = (head) => {
   }
 };
 
+const generateFood = () => {
+  const x = Math.floor(Math.random() * ROWS);
+  const y = Math.floor(Math.random() * COLS);
+
+  if (
+    snake.some(([sx, sy]) => sx === x && sy === y) ||
+    (x === food?.[0] && y === food?.[1])
+  ) {
+    generateFood();
+    return;
+  }
+
+  food = [x, y];
+};
+
+//
+/* ========== ANIMATION FUNCTIONS ========== */
+const clearBoard = () => {
+  ctx.fillStyle = COLORS.BOARD;
+  ctx.clearRect(0, 0, board.width, board.height);
+};
+
+const drawBoard = () => {
+  ctx.strokeStyle = COLORS.BORDER;
+
+  for (let i = 0; i < ROWS; i++) {
+    for (let j = 0; j < COLS; j++) {
+      ctx.strokeRect(j * PIXEL_SIZE, i * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+    }
+  }
+};
+
+const drawSnake = () => {
+  const colorStep = [
+    (COLORS.SNAKE.START[0] - COLORS.SNAKE.END[0]) / snake.length,
+    (COLORS.SNAKE.START[1] - COLORS.SNAKE.END[1]) / snake.length,
+    (COLORS.SNAKE.START[2] - COLORS.SNAKE.END[2]) / snake.length,
+    (COLORS.SNAKE.START[3] - COLORS.SNAKE.END[3]) / snake.length,
+  ];
+
+  for (let i = 0; i < snake.length; i++) {
+    const color = [
+      Math.round(COLORS.SNAKE.END[0] + colorStep[0] * i),
+      Math.round(COLORS.SNAKE.END[1] + colorStep[1] * i),
+      Math.round(COLORS.SNAKE.END[2] + colorStep[2] * i),
+      (COLORS.SNAKE.END[3] + colorStep[3] * i).toFixed(2),
+    ];
+
+    ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]})`;
+    ctx.fillRect(
+      snake[i][1] * PIXEL_SIZE,
+      snake[i][0] * PIXEL_SIZE,
+      PIXEL_SIZE,
+      PIXEL_SIZE
+    );
+  }
+};
+
+const drawFood = () => {
+  ctx.fillStyle = COLORS.FOOD;
+  ctx.fillRect(
+    food[1] * PIXEL_SIZE,
+    food[0] * PIXEL_SIZE,
+    PIXEL_SIZE,
+    PIXEL_SIZE
+  );
+};
+
 const step = () => {
   const head = snake[snake.length - 1];
   const nextHead = currentDirection(head);
@@ -172,34 +193,12 @@ const step = () => {
 
   snake.shift();
   snake.push(nextHead);
+
+  clearBoard();
   drawSnake();
   drawFood();
+  drawBoard();
 };
-
-const drawFood = () => {
-  const position = `${food[0]}_${food[1]}`;
-  const pixel = pixels.get(position);
-
-  pixel.style.background = COLORS.FOOD;
-};
-
-const generateFood = () => {
-  const x = Math.floor(Math.random() * ROWS);
-  const y = Math.floor(Math.random() * COLS);
-
-  if (
-    snake.some(([sx, sy]) => sx === x && sy === y) ||
-    (x === food?.[0] && y === food?.[1])
-  ) {
-    generateFood();
-    return;
-  }
-
-  food = [x, y];
-};
-
-//
-/* ========== ANIMATION FUNCTIONS ========== */
 
 const draw = (currentTime = 0) => {
   const secondsSinceLastRender = (currentTime - lastRenderTime) / 1000;
@@ -214,7 +213,6 @@ const draw = (currentTime = 0) => {
   step();
   requestAnimationFrame(draw);
 };
-
 //
 /* ========== EVENT LISTENERS ========== */
 
@@ -255,7 +253,7 @@ const main = () => {
   if (typeof window === "undefined" && !window.DOMContentLoaded) return;
 
   eventListeners();
-  initialiseBoard(ROWS, COLS);
+  initialiseBoard();
   generateFood();
 
   requestAnimationFrame(draw);

@@ -14,19 +14,17 @@ body {
 }
 
 #board {
+  display: block;
   position: relative;
-  width: 500px;
-  height: 300px;
   margin: 0 auto;
-  background-color: #000;
-  border: 5px solid rgb(34, 34, 34);
+  border: 5px solid #222222;
   border-radius: 5px;
   box-sizing: content-box;
 }
 
 .pixel {
   position: absolute;
-  border: .5px solid rgb(34, 34, 34);
+  border: 0.5px solid rgb(34, 34, 34);
   font-size: 8px;
   text-align: center;
 }
