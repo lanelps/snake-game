@@ -243,7 +243,6 @@ const eventListeners = () => {
     }
 
     if (e.key === " " && !spacePressed) {
-      console.log(`space pressed`);
       spacePressed = true;
       originalSpeed = snakeSpeed;
       snakeSpeed *= 2;
